@@ -20,7 +20,21 @@
         "AMBIENTE",
         "DIR_VIRTUAL_MODELO"
       ]
+    },
+    {
+      "Id": "teste",
+      "Destinatarios": [
+        "felipegomes@educacao.rj.gov.br",
+        "im.felipe@hotmail.com",
+        "im.felipe.temp@hotmail.com"
+      ],
+      "Assunto": "[{{DIR_VIRTUAL}}] Teste",
+      "Mensagem": "Prezados,\r\n\r\nPor gentileza, Testar:\r\n\r\nDesde já obrigado!\r\n\r\nAtenciosamente,\r\nFelipe Ribeiro Gomes",
+      "Variaveis": [
+        "DIR_VIRTUAL",
+        "AMBIENTE",
+        "DIR_VIRTUAL_MODELO"
+      ]
     }
   ]
-
 }
