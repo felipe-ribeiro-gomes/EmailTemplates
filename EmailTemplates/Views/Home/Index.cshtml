@@ -35,17 +35,13 @@
                             <div class="card">
                                 <div class="card-header">
                                     <div class="card-header-title d-inline-block">Destinatários</div>
-                                    <a id="add-mail-recipient" href="javascript: void(0)"><i class="fa-solid fa-plus"></i></a>
+                                    @*<a id="add-mail-recipient" href="javascript: void(0)"><i class="fa-solid fa-plus"></i></a>*@
                                 </div>
                                 <div class="card-body">
                                     <div id="mail-recipient-model" class="mail-recipients mt-1 d-none">
-                                        <select class="select-mail-recipients form-control-sm">
-                                            <option value="To" selected>To:</option>
-                                            <option value="Cc">Cc:</option>
-                                            <option value="Bcc">Bcc:</option>
-                                        </select>
-                                        <input type="text" class="text-mail-recipients form-control-sm" />
-                                        <a class="remove-mail-recipients" href="javascript: void(0)"><i class="fa-solid fa-trash"></i></a>
+                                        <div class="recipient-type d-inline-block"></div>
+                                        <div class="recipient-address d-inline-block"></div>
+                                        @*<a class="remove-mail-recipients" href="javascript: void(0)"><i class="fa-solid fa-trash"></i></a>*@
                                     </div>
                                 </div>
                             </div>
@@ -59,7 +55,8 @@
                                     Assunto
                                 </div>
                                 <div class="card-body">
-                                    <input asp-for="Assunto" type="text" class="form-control-sm w-100" />
+                                    @*<input asp-for="Assunto" type="text" class="form-control-sm w-100" />*@
+                                    <div id="Assunto"></div>
                                 </div>
                             </div>
                         </div>
@@ -70,13 +67,13 @@
                             <div class="card">
                                 <div class="card-header">
                                     <div class="card-header-title d-inline-block">Variáveis</div>
-                                    <a id="add-mail-variable" href="javascript: void(0)"><i class="fa-solid fa-plus"></i></a>
+                                    @*<a id="add-mail-variable" href="javascript: void(0)"><i class="fa-solid fa-plus"></i></a>*@
                                 </div>
                                 <div class="card-body">
                                     <div id="mail-variable-model" class="mail-variables form-group mt-1 d-none">
                                         <label class="label-mail-variables"></label>
                                         <input type="text" class="text-mail-variables form-control-sm" />
-                                        <a class="remove-mail-variables" href="javascript: void(0)"><i class="fa-solid fa-trash"></i></a>
+                                        @*<a class="remove-mail-variables" href="javascript: void(0)"><i class="fa-solid fa-trash"></i></a>*@
                                     </div>
                                 </div>
                             </div>
@@ -94,7 +91,8 @@
                                     <div class="card-header-title d-inline-block">Conteúdo</div>
                                 </div>
                                 <div class="card-body">
-                                    <textarea asp-for="Conteudo" class="form-control-sm w-100"></textarea>
+                                    @*<textarea asp-for="Conteudo" class="form-control-sm w-100"></textarea>*@
+                                    <div id="Conteudo"></div>
                                 </div>
                             </div>
                         </div>
@@ -123,12 +121,12 @@
             width: calc(100% - 20px);
         }
 
-        .select-mail-recipients {
-            width: 65px;
+        .recipient-type {
+            width: 30px;
         }
 
-        .text-mail-recipients {
-            width: calc(100% - 92px);
+        .recipient-address {
+            width: calc(100% - 60px);
         }
 
         .remove-mail-recipients, 
@@ -183,7 +181,7 @@
                 return $(".mail-recipients[id != 'mail-recipient-model']");
             };
 
-            addRecipients = () => {
+            addRecipient = (type, address) => {
                 if (getInsertedRecipients().length >= 10)
                     return;
 
@@ -192,6 +190,8 @@
                 var newLine = $(model[0].outerHTML);
                 newLine.removeAttr("id");
                 newLine.removeClass("d-none");
+                newLine.find(".recipient-type").attr("data-value", type).text(type + ":");
+                newLine.find(".recipient-address").attr("data-value", address).text(address);
                 newLine.appendTo(container);
             };
 
@@ -200,12 +200,16 @@
                 line.remove();
             };
 
+            clearRecipients = () => {
+                $(".mail-recipients[id != 'mail-recipient-model']").remove().end();
+            };
+
             getJsonOfRecipients = () => {
                 var json = [];
                 $(".mail-recipients[id != 'mail-recipient-model']").each((index, el) => {
                     var obj = {};
-                    obj.Type = $(el).find(".select-mail-recipients").val();
-                    obj.Address = $(el).find(".text-mail-recipients").val();
+                    obj.Type = $(el).find(".recipient-type").val();
+                    obj.Address = $(el).find(".recipient-address").val();
                     json.push(obj);
                 });
                 return json;
@@ -223,7 +227,7 @@
                 return $(".mail-variables[id != 'mail-variable-model']");
             };
 
-            addVariables = () => {
+            addVariable = (name) => {
                 if (getInsertedVariables().length >= 10)
                     return;
 
@@ -232,14 +236,18 @@
                 var newLine = $(model[0].outerHTML);
                 newLine.removeAttr("id");
                 newLine.removeClass("d-none");
-                newLine.find("label").attr("data-name", "TESTE");
-                newLine.find("label").text("TESTE:");
+                newLine.find("label").text(name);
+                newLine.find(".text-mail-variables").attr("data-name", name);
                 newLine.appendTo(container);
             };
 
             removeVariables = (variable) => {
                 var line = $(variable).parent().parent();
                 line.remove();
+            };
+
+            clearVariables = () => {
+                $(".mail-variables[id != 'mail-variable-model']").remove().end();
             };
 
             getJsonOfVariables = () => {
@@ -259,27 +267,55 @@
 
             $("body").delegate(".remove-mail-variables", "click", (evt) => removeVariables(evt.target));
 
-            //$("#TemplateId").on("change", (evt) => {
-            //    if (evt.target.value == "")
-            //    {
-            //        $("#Assunto").val("");
-            //        $("#Conteudo").val("");
-            //        $("#DestinatarioIds option[value!='']").remove().end();
-            //        return;
-            //    }
+            $("body").delegate(".text-mail-variables", "input", (evt) => {
+                $("#Assunto").text($("#Assunto").attr("data-original"));
+                $("#Conteudo").text($("#Conteudo").attr("data-original"));
 
-            //    $.get(ResolveUrl("~/Shared/ObtemTemplate"), { id: $("#TemplateId").val() })
-            //        .done((data, textStatus, jqXHR) => {
-            //            console.log(data);
-            //            $("#Assunto").val(data.assunto);
-            //            $("#Conteudo").val(data.mensagem);
-            //            $("#DestinatarioIds option[value!='']").remove().end();
-            //            $(data.destinatarios).each((index, el) => {
-            //                let option = $('<option />').attr('value', el).html(el);
-            //                $("#DestinatarioIds").append(option);
-            //            });
-            //        });
-            //});
+                let newAssunto = $("#Assunto").attr("data-original");
+                let newConteudo = $("#Conteudo").attr("data-original");
+
+                $(".text-mail-variables").each((index, el) => {
+                    if ($(el).val() == "")
+                        return;
+
+                    let variableName = "{{" + $(el).attr("data-name") + "}}";
+                    let variableValue = $(el).val();
+
+                    newAssunto = newAssunto.replaceAll(variableName, variableValue);
+                    newConteudo = newConteudo.replaceAll(variableName, variableValue);
+                });
+
+                $("#Assunto").text(newAssunto);
+                $("#Conteudo").html(newConteudo.replaceAll("\r\n", "<br />"));
+            });
+
+            $("#TemplateId").on("change", (evt) => {
+                clearRecipients();
+                $("#Assunto").text("");
+                clearVariables();
+                $("#Conteudo").text("");
+                
+                if (evt.target.value == "")
+                    return;
+
+                $.get(ResolveUrl("~/Shared/ObtemTemplate/" + $("#TemplateId").val()))
+                    .done((data, textStatus, jqXHR) => {
+                        console.log(data);
+
+                        $(data.destinatarios).each((index, el) => addRecipient(el.tipo, el.email));
+                        $("#Assunto").attr("data-original", data.assunto).text(data.assunto);
+                        $(data.variaveis).each((index, el) => addVariable(el));
+                        $("#Conteudo").attr("data-original", data.mensagem).html(data.mensagem.replaceAll("\r\n", "<br />"));
+
+                        //$("#Assunto").val(data.assunto);
+                        //$("#Conteudo").val(data.mensagem);
+                        //$("#DestinatarioIds option[value!='']").remove().end();
+                        //$(data.destinatarios).each((index, el) => {
+                        //    let option = $('<option />').attr('value', el).html(el);
+                        //    $("#DestinatarioIds").append(option);
+                        //});
+                    });
+            });
         });
     </script>
 }

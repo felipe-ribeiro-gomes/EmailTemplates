@@ -27,6 +27,7 @@ namespace EmailTemplates.Controllers
         }
 
         [HttpGet]
+		[Route("[controller]/[action]/{id}")]
         public IActionResult ObtemTemplate(string id)
         {
             var fullPath = Path.Combine(_webHostEnvironment.ContentRootPath, "wwwroot/db/db.json");
