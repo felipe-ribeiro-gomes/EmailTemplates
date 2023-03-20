@@ -1,0 +1,26 @@
+{
+  "Remetente": {
+    "Email": "felipegomes@educacao.rj.gov.br",
+    "Nome": "Felipe Ribeiro Gomes",
+    "Senha": "Zinedine1972"
+  },
+
+  "Templates": [
+    {
+      "Id": "criacao-diretorio-virtual",
+      "Destinatarios": [
+        "felipegomes@educacao.rj.gov.br",
+        "im.felipe@hotmail.com",
+        "im.felipe.temp@hotmail.com"
+      ],
+      "Assunto": "[{{DIR_VIRTUAL}}] Criação de Diretório Virtual",
+      "Mensagem": "Prezados,\r\n\r\nPor gentileza, criar no {{AMBIENTE}} o diretório virtual “{{DIR_VIRTUAL}}”, em cima do diretório físico de mesmo nome.\r\n\r\nUsar as mesmas configurações do {{DIR_VIRTUAL_MODELO}}.\r\n\r\nDesde já obrigado!\r\n\r\nAtenciosamente,\r\nFelipe Ribeiro Gomes",
+      "Variaveis": [
+        "DIR_VIRTUAL",
+        "AMBIENTE",
+        "DIR_VIRTUAL_MODELO"
+      ]
+    }
+  ]
+
+}

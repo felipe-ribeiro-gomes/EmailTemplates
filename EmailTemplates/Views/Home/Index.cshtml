@@ -1,0 +1,285 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@model HomeViewModel
+
+<div class="card">
+    <div class="card-header">
+        Templates de E-mail
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="form-group col-12">
+                <label asp-for="TemplateId">Selecione o Template:</label>
+                <select asp-for="TemplateId" asp-items="@Model.Templates" class="form-control-sm w-100">
+                    <option></option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        Template Selecionado
+    </div>
+    <div class="card-body">
+        <form asp-action="Index" method="post">
+            <div class="row">
+
+                <div class="col-12 col-md-6">
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-header-title d-inline-block">Destinatários</div>
+                                    <a id="add-mail-recipient" href="javascript: void(0)"><i class="fa-solid fa-plus"></i></a>
+                                </div>
+                                <div class="card-body">
+                                    <div id="mail-recipient-model" class="mail-recipients mt-1 d-none">
+                                        <select class="select-mail-recipients form-control-sm">
+                                            <option value="To" selected>To:</option>
+                                            <option value="Cc">Cc:</option>
+                                            <option value="Bcc">Bcc:</option>
+                                        </select>
+                                        <input type="text" class="text-mail-recipients form-control-sm" />
+                                        <a class="remove-mail-recipients" href="javascript: void(0)"><i class="fa-solid fa-trash"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    Assunto
+                                </div>
+                                <div class="card-body">
+                                    <input asp-for="Assunto" type="text" class="form-control-sm w-100" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-header-title d-inline-block">Variáveis</div>
+                                    <a id="add-mail-variable" href="javascript: void(0)"><i class="fa-solid fa-plus"></i></a>
+                                </div>
+                                <div class="card-body">
+                                    <div id="mail-variable-model" class="mail-variables form-group mt-1 d-none">
+                                        <label class="label-mail-variables"></label>
+                                        <input type="text" class="text-mail-variables form-control-sm" />
+                                        <a class="remove-mail-variables" href="javascript: void(0)"><i class="fa-solid fa-trash"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-12 col-md-6">
+
+                    <div class="row mt-3 mt-md-0">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-header-title d-inline-block">Conteúdo</div>
+                                </div>
+                                <div class="card-body">
+                                    <textarea asp-for="Conteudo" class="form-control-sm w-100"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="row mt-3">
+                <div class="col-12 text-center">
+                    <button id="Enviar" name="Enviar" class="btn btn-primary">Enviar E-mail</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Head {
+    <style>
+        a {
+            text-decoration: none;
+            color: #000;
+        }
+
+        .card-header-title {
+            width: calc(100% - 20px);
+        }
+
+        .select-mail-recipients {
+            width: 65px;
+        }
+
+        .text-mail-recipients {
+            width: calc(100% - 92px);
+        }
+
+        .remove-mail-recipients, 
+        .remove-mail-variables {
+            display: inline-block;
+            width: 10px;
+            margin-left: 5px;
+        }
+
+        #Conteudo {
+            height: 300px;
+        }
+
+        @@media (min-width: 768px) {
+            #Conteudo {
+                height: calc(100vh - 162px);
+            }
+        }
+
+        .text-mail-variables {
+            width: calc(100% - 25px);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script language="javascript">
+        $(() => {
+            //https://weblogs.asp.net/joelvarty/resolveurl-in-javascript
+            var baseUrl = "@Url.Content("~/")";
+            function ResolveUrl(url) {
+                if (url.indexOf("~/") == 0) {
+                    url = baseUrl + url.substring(2);
+                }
+                return url;
+            }
+
+            //função que permite transformar o submit do form em um objeto
+            function jQFormSerializeArrToJson(formSerializeArr) {
+                var jsonObj = {};
+                jQuery.map(formSerializeArr, function (n, i) {
+                    if (!jsonObj.hasOwnProperty(n.name))
+                        jsonObj[n.name] = n.value;
+                });
+
+                return jsonObj;
+            }
+
+            //#region funções para controle dos destinatários
+
+            getInsertedRecipients = () => {
+                return $(".mail-recipients[id != 'mail-recipient-model']");
+            };
+
+            addRecipients = () => {
+                if (getInsertedRecipients().length >= 10)
+                    return;
+
+                var model = $("#mail-recipient-model");
+                var container = model.parent();
+                var newLine = $(model[0].outerHTML);
+                newLine.removeAttr("id");
+                newLine.removeClass("d-none");
+                newLine.appendTo(container);
+            };
+
+            removeRecipients = (recipient) => {
+                var line = $(recipient).parent().parent();
+                line.remove();
+            };
+
+            getJsonOfRecipients = () => {
+                var json = [];
+                $(".mail-recipients[id != 'mail-recipient-model']").each((index, el) => {
+                    var obj = {};
+                    obj.Type = $(el).find(".select-mail-recipients").val();
+                    obj.Address = $(el).find(".text-mail-recipients").val();
+                    json.push(obj);
+                });
+                return json;
+            };
+
+            //#endregion
+
+            $("#add-mail-recipient").on("click", (evt) => addRecipients());
+
+            $("body").delegate(".remove-mail-recipients", "click", (evt) => removeRecipients(evt.target));
+
+            //#region funções para controle das variáveis
+
+            getInsertedVariables = () => {
+                return $(".mail-variables[id != 'mail-variable-model']");
+            };
+
+            addVariables = () => {
+                if (getInsertedVariables().length >= 10)
+                    return;
+
+                var model = $("#mail-variable-model");
+                var container = model.parent();
+                var newLine = $(model[0].outerHTML);
+                newLine.removeAttr("id");
+                newLine.removeClass("d-none");
+                newLine.find("label").attr("data-name", "TESTE");
+                newLine.find("label").text("TESTE:");
+                newLine.appendTo(container);
+            };
+
+            removeVariables = (variable) => {
+                var line = $(variable).parent().parent();
+                line.remove();
+            };
+
+            getJsonOfVariables = () => {
+                var json = [];
+                $(".mail-variables[id != 'mail-variable-model']").each((index, el) => {
+                    var obj = {};
+                    obj.Name = $(el).find(".label-mail-variables").attr("data-name");
+                    obj.Value = $(el).find(".text-mail-variables").val();
+                    json.push(obj);
+                });
+                return json;
+            };
+
+            //#endregion
+
+            $("#add-mail-variable").on("click", (evt) => addVariables());
+
+            $("body").delegate(".remove-mail-variables", "click", (evt) => removeVariables(evt.target));
+
+            //$("#TemplateId").on("change", (evt) => {
+            //    if (evt.target.value == "")
+            //    {
+            //        $("#Assunto").val("");
+            //        $("#Conteudo").val("");
+            //        $("#DestinatarioIds option[value!='']").remove().end();
+            //        return;
+            //    }
+
+            //    $.get(ResolveUrl("~/Shared/ObtemTemplate"), { id: $("#TemplateId").val() })
+            //        .done((data, textStatus, jqXHR) => {
+            //            console.log(data);
+            //            $("#Assunto").val(data.assunto);
+            //            $("#Conteudo").val(data.mensagem);
+            //            $("#DestinatarioIds option[value!='']").remove().end();
+            //            $(data.destinatarios).each((index, el) => {
+            //                let option = $('<option />').attr('value', el).html(el);
+            //                $("#DestinatarioIds").append(option);
+            //            });
+            //        });
+            //});
+        });
+    </script>
+}
